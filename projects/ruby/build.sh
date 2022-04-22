@@ -28,10 +28,11 @@ RUBY_INCLUDES=$(pkg-config --cflags $ruby_version)
 cd $SRC/fuzz
 clang++ abstract-fuzzer.cpp ruby-fuzzer.cpp -o $OUT/fuzz_ruby \
     -std=c++20 \
-#    -g -O0 -fdeclspec -fno-omit-frame-pointer -fno-common \
-#    -fsanitize=address,fuzzer \
     -Wall \
     -L${RUBY_LIB_DIR} \
     ${RUBY_INCLUDES} \
-    ${RUBY_LIBRARIES} |
+    ${RUBY_LIBRARIES} \
     ${LIB_FUZZING_ENGINE}
+
+#    -g -O0 -fdeclspec -fno-omit-frame-pointer -fno-common \
+#    -fsanitize=address,fuzzer \
