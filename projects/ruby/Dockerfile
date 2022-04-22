@@ -29,6 +29,6 @@ RUN apt-get update -y && \
 RUN git clone https://github.com/ruby/ruby.git
 WORKDIR ruby
 
+COPY build.sh $SRC/
 RUN mkdir $SRC/fuzz
-COPY build.sh $SRC/fuzz/
 COPY *.cpp *.hpp $SRC/fuzz/
