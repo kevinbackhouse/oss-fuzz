@@ -26,7 +26,7 @@ RUBY_LIBRARIES=$(pkg-config --variable=LIBRUBYARG_STATIC $ruby_version)
 RUBY_INCLUDES=$(pkg-config --cflags $ruby_version)
 
 cd $SRC/fuzz
-${CXX} abstract-fuzzer.cpp ruby-fuzzer.cpp -o $OUT/fuzz_ruby \
+${CXX} ${CXXFLAGS} abstract-fuzzer.cpp ruby-fuzzer.cpp -o $OUT/fuzz_ruby \
     -std=c++20 \
     -Wall \
     -L${RUBY_LIB_DIR} \
