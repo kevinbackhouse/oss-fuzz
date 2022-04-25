@@ -16,7 +16,7 @@
 ################################################################################
 
 ./autogen.sh
-cflags="$CFLAGS" optflags="" ./configure
+cflags="${CFLAGS}" optflags="" ./configure
 make -j $(nproc)
 make install -j $(nproc)
 
@@ -26,7 +26,7 @@ RUBY_LIBRARIES=$(pkg-config --variable=LIBRUBYARG_STATIC $ruby_version)
 RUBY_INCLUDES=$(pkg-config --cflags $ruby_version)
 
 cd $SRC/fuzz
-clang++ abstract-fuzzer.cpp ruby-fuzzer.cpp -o $OUT/fuzz_ruby \
+${CXX} abstract-fuzzer.cpp ruby-fuzzer.cpp -o $OUT/fuzz_ruby \
     -std=c++20 \
     -Wall \
     -L${RUBY_LIB_DIR} \
