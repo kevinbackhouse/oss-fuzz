@@ -23,3 +23,5 @@ std::optional<CString> FuzzingDataProvider::consume(size_t hint)
 
     return ret;
 }
+
+AbstractFuzzer::~AbstractFuzzer() {}

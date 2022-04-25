@@ -82,11 +82,14 @@ namespace Ruby
     TargetFunction::TargetFunction(const std::string &module, const std::string &cls, const std::string &name, std::vector<DataType> arguments)
         : m_arguments(std::move(arguments))
     {
+        fprintf(stderr, "str1: %s\n", module.c_str());
         // Import the required module.
         Utilities::require(module.c_str());
+        fprintf(stderr, "str2: %s\n", module.c_str());
 
         // Resolve the target function.
         obj = rb_path2class(cls.c_str());
+        fprintf(stderr, "obj: %lu\n", obj);
         method_id = rb_intern(name.c_str());
         nargs = static_cast<int>(m_arguments.size());
         args.resize(m_arguments.size());
@@ -97,6 +100,12 @@ namespace Ruby
         RUBY_INIT_STACK;
         ruby_init();
         ruby_init_loadpath();
+    }
+
+    Fuzzer::~Fuzzer()
+    {
+//        ruby_finalize();
+        ruby_cleanup(0);
     }
 
     static std::optional<VALUE> get_fuzzed_value(FuzzingDataProvider &data_provider, const std::vector<DataType> &arguments, int i)

@@ -80,6 +80,7 @@ class AbstractFuzzer
 {
 public:
     virtual void fuzz(const uint8_t *data, size_t size) = 0;
+    virtual ~AbstractFuzzer();
 
 protected:
     FuzzingDataProvider m_data_provider;

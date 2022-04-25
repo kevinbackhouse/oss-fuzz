@@ -45,6 +45,8 @@ namespace Ruby
     class Fuzzer final : public AbstractFuzzer
     {
     public:
+        ~Fuzzer();
+
         static std::unique_ptr<Fuzzer> create();
 
         void fuzz(const uint8_t *data, size_t size) override;
