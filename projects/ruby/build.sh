@@ -25,6 +25,8 @@ RUBY_LIB_DIR=$(pkg-config --variable=libdir $ruby_version)
 RUBY_LIBRARIES=$(pkg-config --variable=LIBRUBYARG_STATIC $ruby_version)
 RUBY_INCLUDES=$(pkg-config --cflags $ruby_version)
 
+find $RUBY_LIB_DIR -name "json*"
+
 cd $SRC/fuzz
 ${CXX} ${CXXFLAGS} abstract-fuzzer.cpp ruby-fuzzer.cpp -o $OUT/fuzz_ruby \
     -std=c++20 \
