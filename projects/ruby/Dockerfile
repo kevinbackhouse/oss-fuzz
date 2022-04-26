@@ -23,12 +23,12 @@ RUN apt-get update -y && \
     apt-get install -y make autoconf automake build-essential clang \
                        libssl-dev libyaml-dev libreadline6-dev \
                        zlib1g-dev libncurses5-dev libffi-dev \
-                       bison autoconf ruby pkg-config
-#                        git gdb tmux emacs
+                       bison autoconf ruby pkg-config \
+                        git gdb tmux emacs
 
 RUN git clone https://github.com/ruby/ruby.git
 WORKDIR ruby
 
 COPY build.sh $SRC/
 RUN mkdir $SRC/fuzz
-COPY *.cpp *.hpp $SRC/fuzz/
+COPY *.cpp *.hpp *.options $SRC/fuzz/
