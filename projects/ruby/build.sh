@@ -43,4 +43,4 @@ ${CXX} ${CXXFLAGS} abstract-fuzzer.cpp ruby-fuzzer.cpp -o $OUT/fuzz_ruby \
 #    -fsanitize=address,fuzzer \
 
 # Copy options to out
-cp $SRC/*.options $OUT/
+cp $SRC/fuzz/*.options $OUT/
