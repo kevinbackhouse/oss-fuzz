@@ -15,6 +15,9 @@
 #
 ################################################################################
 
+export ASAN_OPTIONS="detect_leaks=0"
+export UBSAN_OPTIONS="detect_leaks=0"
+
 ./autogen.sh
 cflags="${CFLAGS}" optflags="" ./configure
 make -j $(nproc)
