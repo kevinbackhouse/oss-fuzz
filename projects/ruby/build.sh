@@ -41,3 +41,6 @@ ${CXX} ${CXXFLAGS} abstract-fuzzer.cpp ruby-fuzzer.cpp -o $OUT/fuzz_ruby \
 
 #    -g -O0 -fdeclspec -fno-omit-frame-pointer -fno-common \
 #    -fsanitize=address,fuzzer \
+
+# Copy options to out
+cp $SRC/*.options $OUT/
