@@ -76,6 +76,10 @@ private:
     size_t m_off{0};
 };
 
+// Specialization for CString.
+template <>
+std::optional<CString> FuzzingDataProvider::consume(size_t hint);
+
 class AbstractFuzzer
 {
 public:
