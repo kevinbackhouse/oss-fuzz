@@ -27,6 +27,7 @@ ruby_version=$(basename `find . -name 'ruby-*.pc'` .pc)
 RUBY_LIB_DIR=$(pkg-config --variable=libdir $ruby_version)
 RUBY_LIBRARIES=$(pkg-config --variable=LIBRUBYARG_STATIC $ruby_version)
 RUBY_INCLUDES=$(pkg-config --cflags $ruby_version)
+RUBY_RUBYLIBDIR=$(pkg-config --variable=rubylibdir $ruby_version)
 
 find $RUBY_LIB_DIR -name "json*"
 
@@ -44,3 +45,4 @@ ${CXX} ${CXXFLAGS} abstract-fuzzer.cpp ruby-fuzzer.cpp -o $OUT/fuzz_ruby \
 
 # Copy options to out
 cp $SRC/fuzz/*.options $OUT/
+cp -r $RUBY_RUBYLIBDIR $OUT/rubylibdir

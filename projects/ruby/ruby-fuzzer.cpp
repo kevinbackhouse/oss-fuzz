@@ -15,7 +15,7 @@ limitations under the License.
 #include <cstdint>
 #include <memory>
 #include <ruby/ruby.h>
-
+#include <unistd.h>
 #include "abstract-fuzzer.hpp"
 #include "ruby-fuzzer.hpp"
 
@@ -176,6 +176,22 @@ namespace Ruby
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
+    char rubylibdir[PATH_MAX];
+    char cwd[PATH_MAX];
+    getcwd(cwd, sizeof(cwd));
+
+    fprintf(stderr, "cwd: %s\n", cwd);
+    for (size_t i = 0; environ[i]; i++) {
+        fprintf(stderr, "i = %ld, %s\n", i, environ[i]);
+    }
+
+    const char* outpath = getenv("OUT");
+    if (!outpath) {
+      outpath = cwd;
+    }
+    snprintf(rubylibdir, sizeof(rubylibdir), "%s/rubylibdir", outpath);
+    fprintf(stderr, "rubylibdir: %s\n", rubylibdir);
+    setenv("RUBYLIB", rubylibdir, 0);
     static auto fuzzer = Ruby::Fuzzer::create();
     fuzzer->fuzz(data, size);
 
