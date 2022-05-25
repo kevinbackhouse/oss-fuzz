@@ -18,12 +18,16 @@ enum RubyDataType {
   RDT_CString
 };
 
-struct TargetFunction
-{
-  VALUE obj;
-  ID method_id;
-  int nargs;
-  VALUE *args; // array of length `nargs`
+struct TargetFunction {
+  VALUE obj_;
+  ID method_id_;
+  int nargs_;
+  const enum RubyDataType *argTypes_;
+};
+
+struct TargetCall {
+  struct TargetFunction *fcn_;
+  VALUE *args_;
 };
 
 VALUE eval(const char *cmd) {
@@ -38,14 +42,15 @@ VALUE eval(const char *cmd) {
 
 static VALUE call_protected_helper(VALUE rdata)
 {
-  struct TargetFunction *data = (struct TargetFunction *)(rdata);
-  return rb_funcall2(data->obj, data->method_id, data->nargs, data->args);
+  struct TargetCall *call = (struct TargetCall *)(rdata);
+  struct TargetFunction *fcn = call->fcn_;
+  return rb_funcall2(fcn->obj_, fcn->method_id_, fcn->nargs_, call->args_);
 };
 
-VALUE call_protected(struct TargetFunction *fcn)
+VALUE call_protected(struct TargetCall *call)
 {
   int state = 0;
-  VALUE result = rb_protect(call_protected_helper, (VALUE)(fcn), &state);
+  VALUE result = rb_protect(call_protected_helper, (VALUE)(call), &state);
   if (state != 0) {
     rb_set_errinfo(Qnil);
   }
@@ -126,6 +131,7 @@ VALUE generate_value(struct ByteStream *bs, const enum RubyDataType t) {
   }
 }
 
+#if 0
 int fuzz_function(struct ByteStream *bs, const char *module, const char *cls, const char *name, 
                   const int nargs, const enum RubyDataType *argTypes) {
   if (nargs < 0) {
@@ -157,31 +163,70 @@ out:
   free(args);
   return result;
 }
+#endif
 
-static int fuzz_date_strptime(struct ByteStream *bs) {
+int run_fuzz_function(struct ByteStream *bs, struct TargetFunction *fcn) {
+  if (fcn->nargs_ < 0) {
+    return -1;
+  }
+  VALUE *args = calloc(fcn->nargs_, sizeof(VALUE));
+  if (!args) {
+    return -1;
+  }
+  int result = -1;
+  int i;
+  for (i = 0; i < fcn->nargs_; i++) {
+    VALUE v = generate_value(bs, fcn->argTypes_[i]);
+    if (!v) {
+      goto out;
+    }
+    args[i] = v;
+  }
+
+  struct TargetCall call;
+  call.fcn_ = fcn;
+  call.args_ = args;
+  
+  result = call_protected(&call);
+out:
+  free(args);
+  return result;
+}
+
+void init_TargetFunction(
+  struct TargetFunction *target, const char *module, const char *cls, const char *name, 
+  const int nargs, const enum RubyDataType *argTypes) {
+  require(module);
+  target->obj_ = rb_path2class(cls);
+  target->method_id_ = rb_intern(name);
+  target->nargs_ = nargs;
+  target->argTypes_ = argTypes;
+}
+
+static void init_date_strptime(struct TargetFunction *target) {
    enum RubyDataType argTypes[2] = { RDT_CString, RDT_CString };
-   return fuzz_function(bs, "date", "Date", "strptime", ARRAYSIZE(argTypes), argTypes);
+   init_TargetFunction(target, "date", "Date", "strptime", ARRAYSIZE(argTypes), argTypes);
 }
 
-static int fuzz_date_httpdate(struct ByteStream *bs) {
+static void init_date_httpdate(struct TargetFunction *target) {
    enum RubyDataType argTypes[2] = { RDT_CString };
-   return fuzz_function(bs, "date", "Date", "httpdate", ARRAYSIZE(argTypes), argTypes);
+   init_TargetFunction(target, "date", "Date", "httpdate", ARRAYSIZE(argTypes), argTypes);
 }
 
-static int fuzz_json_parse(struct ByteStream *bs) {
+static void init_json_parse(struct TargetFunction *target) {
    enum RubyDataType argTypes[1] = { RDT_CString };
-   return fuzz_function(bs, "json", "JSON", "parse", ARRAYSIZE(argTypes), argTypes);
+   init_TargetFunction(target, "json", "JSON", "parse", ARRAYSIZE(argTypes), argTypes);
 }
 
-static int fuzz_psych_parse(struct ByteStream *bs) {
+static void init_psych_parse(struct TargetFunction *target) {
    enum RubyDataType argTypes[1] = { RDT_CString };
-   return fuzz_function(bs, "psych", "Psych", "parse", ARRAYSIZE(argTypes), argTypes);
+   init_TargetFunction(target, "psych", "Psych", "parse", ARRAYSIZE(argTypes), argTypes);
 }
 
-typedef int (*fuzz_function_ptr)(struct ByteStream *bs);
+typedef void (*init_TargetFunction_ptr)(struct TargetFunction *target);
 
-static fuzz_function_ptr fuzz_functions[] = {
-  fuzz_date_strptime, fuzz_date_httpdate, fuzz_json_parse, fuzz_psych_parse
+static init_TargetFunction_ptr init_functions[] = {
+  init_json_parse, init_date_strptime, init_date_httpdate, init_psych_parse
 };
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
@@ -201,6 +246,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     snprintf(rubylibdir, sizeof(rubylibdir), "%s/rubylibdir", outpath);
     setenv("RUBYLIB", rubylibdir, 0);
 
+    struct TargetFunction fuzz_functions[ARRAYSIZE(init_functions)] = {};
+
     // Initialize the Ruby interpreter.
     static bool ruby_initialized = false;
     if (!ruby_initialized) {
@@ -208,6 +255,11 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
       RUBY_INIT_STACK;
       ruby_init();
       ruby_init_loadpath();
+
+      // Initialize the fuzzing functions.
+      for (size_t i = 0; i < ARRAYSIZE(init_functions); i++) {
+        init_functions[i](&fuzz_functions[i]);
+      }
     }
 
     // Choose a function from `fuzz_functions`.
@@ -215,11 +267,12 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (BytesStream_get_uint32_t(&bs, &i) < 0) {
       goto out;
     }
-    fuzz_function_ptr fuzz_fcn = fuzz_functions[i % ARRAYSIZE(fuzz_functions)];
-
+    struct TargetFunction *fcn = &fuzz_functions[i % ARRAYSIZE(fuzz_functions)];
+    run_fuzz_function(&bs, fcn);
+#if 0
     // Run the ruby gem.
     fuzz_fcn(&bs);
-
+#endif
 out:
     return 0;
 }
