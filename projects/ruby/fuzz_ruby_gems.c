@@ -19,6 +19,9 @@ enum RubyDataType {
 };
 
 struct TargetFunction {
+  const char *module_;
+  const char *cls_;
+  const char *name_;
   VALUE obj_;
   ID method_id_;
   int nargs_;
@@ -105,7 +108,8 @@ VALUE generate_CString(struct ByteStream *bs) {
     return 0;
   }
   if (size > bs->size_ - bs->pos_) {
-    return 0;
+//    return 0;
+    size = bs->size_ - bs->pos_;
   }
   char* data = malloc(size);
   if (!data) {
@@ -131,44 +135,11 @@ VALUE generate_value(struct ByteStream *bs, const enum RubyDataType t) {
   }
 }
 
-#if 0
-int fuzz_function(struct ByteStream *bs, const char *module, const char *cls, const char *name, 
-                  const int nargs, const enum RubyDataType *argTypes) {
-  if (nargs < 0) {
-    return -1;
-  }
-  VALUE *args = calloc(nargs, sizeof(VALUE));
-  if (!args) {
-    return -1;
-  }
-  int result = -1;
-  int i;
-  for (i = 0; i < nargs; i++) {
-    VALUE v = generate_value(bs, argTypes[i]);
-    if (!v) {
-      goto out;
-    }
-    args[i] = v;
-  }
-
-  struct TargetFunction target;
-  require(module);
-  target.obj = rb_path2class(cls);
-  target.method_id = rb_intern(name);
-  target.nargs = nargs;
-  target.args = args;
-  
-  result = call_protected(&target);
-out:
-  free(args);
-  return result;
-}
-#endif
-
 int run_fuzz_function(struct ByteStream *bs, struct TargetFunction *fcn) {
   if (fcn->nargs_ < 0) {
     return -1;
   }
+
   VALUE *args = calloc(fcn->nargs_, sizeof(VALUE));
   if (!args) {
     return -1;
@@ -188,6 +159,7 @@ int run_fuzz_function(struct ByteStream *bs, struct TargetFunction *fcn) {
   call.args_ = args;
   
   result = call_protected(&call);
+
 out:
   free(args);
   return result;
@@ -197,6 +169,9 @@ void init_TargetFunction(
   struct TargetFunction *target, const char *module, const char *cls, const char *name, 
   const int nargs, const enum RubyDataType *argTypes) {
   require(module);
+  target->module_ = module;
+  target->cls_ = cls;
+  target->name_ = name;
   target->obj_ = rb_path2class(cls);
   target->method_id_ = rb_intern(name);
   target->nargs_ = nargs;
@@ -204,29 +179,30 @@ void init_TargetFunction(
 }
 
 static void init_date_strptime(struct TargetFunction *target) {
-   enum RubyDataType argTypes[2] = { RDT_CString, RDT_CString };
+   static const enum RubyDataType argTypes[2] = { RDT_CString, RDT_CString };
    init_TargetFunction(target, "date", "Date", "strptime", ARRAYSIZE(argTypes), argTypes);
 }
 
 static void init_date_httpdate(struct TargetFunction *target) {
-   enum RubyDataType argTypes[2] = { RDT_CString };
+   static const enum RubyDataType argTypes[2] = { RDT_CString };
    init_TargetFunction(target, "date", "Date", "httpdate", ARRAYSIZE(argTypes), argTypes);
 }
 
 static void init_json_parse(struct TargetFunction *target) {
-   enum RubyDataType argTypes[1] = { RDT_CString };
+   static const enum RubyDataType argTypes[1] = { RDT_CString };
    init_TargetFunction(target, "json", "JSON", "parse", ARRAYSIZE(argTypes), argTypes);
 }
 
 static void init_psych_parse(struct TargetFunction *target) {
-   enum RubyDataType argTypes[1] = { RDT_CString };
+   static const enum RubyDataType argTypes[1] = { RDT_CString };
    init_TargetFunction(target, "psych", "Psych", "parse", ARRAYSIZE(argTypes), argTypes);
 }
 
 typedef void (*init_TargetFunction_ptr)(struct TargetFunction *target);
 
 static init_TargetFunction_ptr init_functions[] = {
-  init_json_parse, init_date_strptime, init_date_httpdate, init_psych_parse
+//  init_date_strptime, init_date_httpdate
+  init_json_parse, init_psych_parse
 };
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
@@ -246,7 +222,8 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     snprintf(rubylibdir, sizeof(rubylibdir), "%s/rubylibdir", outpath);
     setenv("RUBYLIB", rubylibdir, 0);
 
-    struct TargetFunction fuzz_functions[ARRAYSIZE(init_functions)] = {};
+    // Static array of target functions. These only need to be initialized once.
+    static struct TargetFunction target_functions[ARRAYSIZE(init_functions)] = {};
 
     // Initialize the Ruby interpreter.
     static bool ruby_initialized = false;
@@ -258,21 +235,18 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 
       // Initialize the fuzzing functions.
       for (size_t i = 0; i < ARRAYSIZE(init_functions); i++) {
-        init_functions[i](&fuzz_functions[i]);
+        init_functions[i](&target_functions[i]);
       }
     }
 
-    // Choose a function from `fuzz_functions`.
+    // Choose a function from `target_functions`.
     uint32_t i = 0;
     if (BytesStream_get_uint32_t(&bs, &i) < 0) {
       goto out;
     }
-    struct TargetFunction *fcn = &fuzz_functions[i % ARRAYSIZE(fuzz_functions)];
+    struct TargetFunction *fcn = &target_functions[i % ARRAYSIZE(target_functions)];
     run_fuzz_function(&bs, fcn);
-#if 0
-    // Run the ruby gem.
-    fuzz_fcn(&bs);
-#endif
+
 out:
     return 0;
 }
