@@ -184,8 +184,13 @@ static void init_date_strptime(struct TargetFunction *target) {
 }
 
 static void init_date_httpdate(struct TargetFunction *target) {
-   static const enum RubyDataType argTypes[2] = { RDT_CString };
+   static const enum RubyDataType argTypes[1] = { RDT_CString };
    init_TargetFunction(target, "date", "Date", "httpdate", ARRAYSIZE(argTypes), argTypes);
+}
+
+static void init_date_parse(struct TargetFunction *target) {
+   static const enum RubyDataType argTypes[1] = { RDT_CString };
+   init_TargetFunction(target, "date", "Date", "parse", ARRAYSIZE(argTypes), argTypes);
 }
 
 static void init_json_parse(struct TargetFunction *target) {
@@ -201,7 +206,8 @@ static void init_psych_parse(struct TargetFunction *target) {
 typedef void (*init_TargetFunction_ptr)(struct TargetFunction *target);
 
 static init_TargetFunction_ptr init_functions[] = {
-//  init_date_strptime, init_date_httpdate
+//  init_date_parse,
+//  init_date_strptime, init_date_httpdate,
   init_json_parse, init_psych_parse
 };
 
