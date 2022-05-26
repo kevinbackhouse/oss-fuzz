@@ -19,7 +19,10 @@ export ASAN_OPTIONS="detect_leaks=0"
 export UBSAN_OPTIONS="detect_leaks=0"
 
 ./autogen.sh
-cflags="${CFLAGS}" optflags="" ./configure
+
+# run ./configure with CFLAGS renamed to cflags
+(export cflags="${CFLAGS}"; unset CFLAGS; optflags="" ./configure)
+
 make -j $(nproc)
 make install -j $(nproc)
 
