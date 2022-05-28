@@ -19,20 +19,26 @@ export ASAN_OPTIONS="detect_leaks=0"
 export UBSAN_OPTIONS="detect_leaks=0"
 
 ./autogen.sh
+./configure
 
-# run ./configure with CFLAGS renamed to cflags
-(export cflags="${CFLAGS}"; unset CFLAGS; optflags="" ./configure)
+make -j $(nproc)
+make install -j $(nproc)
+
+git clean -fdx
+mkdir -p exe
+ln -s `which ruby` exe/ruby
+
+./autogen.sh
+./configure --enable-shared
 
 make -j $(nproc)
 make install -j $(nproc)
 
 ruby_version=$(basename `find . -name 'ruby-*.pc'` .pc)
 RUBY_LIB_DIR=$(pkg-config --variable=libdir $ruby_version)
-RUBY_LIBRARIES=$(pkg-config --variable=LIBRUBYARG_STATIC $ruby_version)
+RUBY_LIBRARIES=$(pkg-config --variable=LIBRUBYARG_SHARED $ruby_version)
 RUBY_INCLUDES=$(pkg-config --cflags $ruby_version)
 RUBY_RUBYLIBDIR=$(pkg-config --variable=rubylibdir $ruby_version)
-
-find $RUBY_LIB_DIR -name "json*"
 
 cd $SRC/fuzz
 ${CC} ${CFLAGS} fuzz_ruby_gems.c -o $OUT/fuzz_ruby_gems \

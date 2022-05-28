@@ -206,7 +206,7 @@ static void init_psych_parse(struct TargetFunction *target) {
 typedef void (*init_TargetFunction_ptr)(struct TargetFunction *target);
 
 static init_TargetFunction_ptr init_functions[] = {
-//  init_date_parse,
+  init_date_parse,
 //  init_date_strptime, init_date_httpdate,
   init_json_parse, init_psych_parse
 };
@@ -235,7 +235,9 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     static bool ruby_initialized = false;
     if (!ruby_initialized) {
       ruby_initialized = true;
+#if 0
       RUBY_INIT_STACK;
+#endif
       ruby_init();
       ruby_init_loadpath();
 
