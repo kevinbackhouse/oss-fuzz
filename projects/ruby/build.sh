@@ -19,19 +19,13 @@ export ASAN_OPTIONS="detect_leaks=0"
 export UBSAN_OPTIONS="detect_leaks=0"
 
 ./autogen.sh
-./configure
-
-make -j $(nproc)
-make install -j $(nproc)
-
-git clean -fdx
-mkdir -p exe
-ln -s `which ruby` exe/ruby
-
-./autogen.sh
 ./configure --enable-shared
 
 make -j $(nproc)
+
+mkdir -p exe
+ln -s ../ruby exe/ruby
+
 make install -j $(nproc)
 
 ruby_version=$(basename `find . -name 'ruby-*.pc'` .pc)
