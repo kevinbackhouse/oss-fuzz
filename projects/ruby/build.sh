@@ -45,4 +45,4 @@ ${CC} ${CFLAGS} fuzz_ruby_gems.c -o $OUT/run_fuzz_ruby_gems \
 
 # Copy options to out
 cp $SRC/fuzz/*.options $OUT/
-cp -r $RUBY_RUBYLIBDIR $OUT/rubylibdir
+cp -r $RUBY_LIB_DIR $OUT/lib
