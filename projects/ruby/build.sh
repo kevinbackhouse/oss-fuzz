@@ -28,6 +28,8 @@ ln -s ../ruby exe/ruby
 
 make install -j $(nproc)
 
+ruby -e 'puts $LOAD_PATH'
+
 ruby_version=$(basename `find . -name 'ruby-*.pc'` .pc)
 RUBY_LIB_DIR=$(pkg-config --variable=libdir $ruby_version)
 RUBY_LIBRARIES=$(pkg-config --variable=LIBRUBYARG_SHARED $ruby_version)
