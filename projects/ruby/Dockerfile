@@ -31,4 +31,4 @@ WORKDIR ruby
 
 COPY build.sh $SRC/
 RUN mkdir $SRC/fuzz
-COPY *.cpp *.hpp *.c *.options $SRC/fuzz/
+COPY *.rb *.c *.options $SRC/fuzz/
