@@ -28,6 +28,7 @@ old_lib_dir = ENV["RUBY_LIB_DIR"]
 new_lib_dir = ENV["OUT"] + "/lib"
 
 puts "#!/bin/bash"
+puts "# LLVMFuzzerTestOneInput for fuzzer detection."
 puts "export LD_LIBRARY_PATH=" + new_lib_dir
 
 n = $LOAD_PATH.length
