@@ -28,24 +28,20 @@ ln -s ../ruby exe/ruby
 
 make install -j $(nproc)
 
-ruby -e 'puts $LOAD_PATH'
-
 ruby_version=$(basename `find . -name 'ruby-*.pc'` .pc)
-RUBY_LIB_DIR=$(pkg-config --variable=libdir $ruby_version)
-RUBY_LIBRARIES=$(pkg-config --variable=LIBRUBYARG_SHARED $ruby_version)
-RUBY_INCLUDES=$(pkg-config --cflags $ruby_version)
-RUBY_RUBYLIBDIR=$(pkg-config --variable=rubylibdir $ruby_version)
+export RUBY_LIB_DIR=$(pkg-config --variable=libdir $ruby_version)
+export RUBY_LIBRARIES=$(pkg-config --variable=LIBRUBYARG_SHARED $ruby_version)
+export RUBY_INCLUDES=$(pkg-config --cflags $ruby_version)
+export RUBY_RUBYLIBDIR=$(pkg-config --variable=rubylibdir $ruby_version)
 
 cd $SRC/fuzz
-${CC} ${CFLAGS} fuzz_ruby_gems.c -o $OUT/fuzz_ruby_gems \
+ruby gen_fuzz_wrapper.rb > fuzz_ruby_gems.sh
+${CC} ${CFLAGS} fuzz_ruby_gems.c -o $OUT/run_fuzz_ruby_gems \
     -Wall \
     -L${RUBY_LIB_DIR} \
     ${RUBY_INCLUDES} \
     ${RUBY_LIBRARIES} \
     ${LIB_FUZZING_ENGINE}
-
-#    -g -O0 -fdeclspec -fno-omit-frame-pointer -fno-common \
-#    -fsanitize=address,fuzzer \
 
 # Copy options to out
 cp $SRC/fuzz/*.options $OUT/

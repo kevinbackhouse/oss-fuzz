@@ -213,12 +213,15 @@ static init_TargetFunction_ptr init_functions[] = {
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
+#if 0
     char rubylibdir[PATH_MAX];
     char cwd[PATH_MAX];
+#endif
     struct ByteStream bs = {};
 
     ByteStream_init(&bs, data, size);
 
+#if 0
     getcwd(cwd, sizeof(cwd));
 
     const char *outpath = getenv("OUT");
@@ -227,6 +230,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     }
     snprintf(rubylibdir, sizeof(rubylibdir), "%s/rubylibdir", outpath);
     setenv("RUBYLIB", rubylibdir, 0);
+#endif
 
     // Static array of target functions. These only need to be initialized once.
     static struct TargetFunction target_functions[ARRAYSIZE(init_functions)] = {};
