@@ -35,8 +35,10 @@ export RUBY_INCLUDES=$(pkg-config --cflags $ruby_version)
 export RUBY_RUBYLIBDIR=$(pkg-config --variable=rubylibdir $ruby_version)
 
 cd $SRC/fuzz
-ruby gen_fuzz_wrapper.rb > fuzz_ruby_gems.sh
-${CC} ${CFLAGS} fuzz_ruby_gems.c -o $OUT/run_fuzz_ruby_gems \
+ruby gen_fuzz_wrapper.rb > $OUT/fuzz_ruby_gems.sh
+chmod u+x $OUT/fuzz_ruby_gems.sh
+mkdir $OUT/bin
+${CC} ${CFLAGS} fuzz_ruby_gems.c -o $OUT/bin/run_fuzz_ruby_gems \
     -Wall \
     -L${RUBY_LIB_DIR} \
     ${RUBY_INCLUDES} \
