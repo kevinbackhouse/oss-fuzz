@@ -44,4 +44,6 @@ while i < n do
   end
   i += 1
 end
+puts "env"
+puts "echo ./bin/run_fuzz_ruby_gems $@"
 puts "./bin/run_fuzz_ruby_gems $@"
