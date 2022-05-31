@@ -26,24 +26,25 @@
 
 old_lib_dir = ENV["RUBY_LIB_DIR"]
 
-puts "#!/bin/sh"
-puts "# LLVMFuzzerTestOneInput for fuzzer detection."
-puts "export THIS_DIR=$(dirname $(realpath \"$0\"))"
-puts "export THIS_LIB_DIR=\"$THIS_DIR/lib\""
-puts "export LD_LIBRARY_PATH=\"$THIS_LIB_DIR:$LD_LIBRARY_PATH\""
-
 n = $LOAD_PATH.length
+puts "#include <stdio.h>"
+puts ""
+puts "static int init_ruby_load_paths(char *buf, size_t bufsize, const char *outpath) {"
+puts "  return snprintf(buf, bufsize,"
 i = 0
-puts "export RUBYLIB=\"\\"
 while i < n do
   path = $LOAD_PATH[i]
   if path.start_with?(old_lib_dir)
-    puts "$THIS_LIB_DIR" + path.delete_prefix(old_lib_dir) + (i+1 < n ? ":\\" : "\"")
+    puts "    \"%s/lib" + path.delete_prefix(old_lib_dir) + (i+1 < n ? ":\"" : "\",")
   else
-    abort
+    puts "#error path has incorrect prefix: " + path
   end
   i += 1
 end
-puts "env"
-puts "echo ./bin/run_fuzz_ruby_gems $@"
-puts "./bin/run_fuzz_ruby_gems $@"
+i = 0
+while i < n do
+  puts "    outpath" + (i+1 < n ? "," : "")
+  i += 1
+end
+puts "  );"
+puts "}"

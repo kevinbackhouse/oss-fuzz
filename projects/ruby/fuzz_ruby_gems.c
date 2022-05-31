@@ -9,14 +9,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+#include "init_ruby_load_paths.h"
 #include <ruby/ruby.h>
 #include <unistd.h>
 
-#define ARRAYSIZE(x) (sizeof(x)/sizeof(x[0]))
+#define ARRAYSIZE(x) (sizeof(x) / sizeof(x[0]))
 
-enum RubyDataType {
-  RDT_CString
-};
+enum RubyDataType { RDT_CString };
 
 struct TargetFunction {
   const char *module_;
@@ -39,19 +38,17 @@ VALUE eval(const char *cmd) {
   if (state != 0) {
     rb_set_errinfo(Qnil);
   }
-  
+
   return result;
 }
 
-static VALUE call_protected_helper(VALUE rdata)
-{
+static VALUE call_protected_helper(VALUE rdata) {
   struct TargetCall *call = (struct TargetCall *)(rdata);
   struct TargetFunction *fcn = call->fcn_;
   return rb_funcall2(fcn->obj_, fcn->method_id_, fcn->nargs_, call->args_);
 };
 
-VALUE call_protected(struct TargetCall *call)
-{
+VALUE call_protected(struct TargetCall *call) {
   int state = 0;
   VALUE result = rb_protect(call_protected_helper, (VALUE)(call), &state);
   if (state != 0) {
@@ -73,13 +70,14 @@ struct ByteStream {
 };
 
 void ByteStream_init(struct ByteStream *bs, const uint8_t *data, size_t size) {
-    bs->data_ = data;
-    bs->size_ = size;
-    bs->pos_ = 0;
+  bs->data_ = data;
+  bs->size_ = size;
+  bs->pos_ = 0;
 }
 
-// Copy bytes from the ByteStream into `data`. Returns 0 on success, -1 on error.
-// Error only occurs if there aren't enough bytes remaining in the ByteStream.
+// Copy bytes from the ByteStream into `data`. Returns 0 on success, -1 on
+// error. Error only occurs if there aren't enough bytes remaining in the
+// ByteStream.
 int ByteStream_get_bytes(struct ByteStream *bs, uint8_t *data, size_t size) {
   if (size > bs->size_ - bs->pos_) {
     return -1;
@@ -91,12 +89,12 @@ int ByteStream_get_bytes(struct ByteStream *bs, uint8_t *data, size_t size) {
 
 // Initialize x with bytes from the ByteStream. Returns -1 on error.
 int BytesStream_get_uint32_t(struct ByteStream *bs, uint32_t *x) {
-  return ByteStream_get_bytes(bs, (uint8_t*)x, sizeof(x));
+  return ByteStream_get_bytes(bs, (uint8_t *)x, sizeof(x));
 }
 
 // Initialize x with bytes from the ByteStream. Returns -1 on error.
 int BytesStream_get_uint64_t(struct ByteStream *bs, uint64_t *x) {
-  return ByteStream_get_bytes(bs, (uint8_t*)x, sizeof(x));
+  return ByteStream_get_bytes(bs, (uint8_t *)x, sizeof(x));
 }
 
 VALUE generate_CString(struct ByteStream *bs) {
@@ -108,15 +106,15 @@ VALUE generate_CString(struct ByteStream *bs) {
     return 0;
   }
   if (size > bs->size_ - bs->pos_) {
-//    return 0;
+    //    return 0;
     size = bs->size_ - bs->pos_;
   }
-  char* data = malloc(size);
+  char *data = malloc(size);
   if (!data) {
     return 0;
   }
   VALUE result = 0;
-  if (ByteStream_get_bytes(bs, (uint8_t*)data, size) < 0) {
+  if (ByteStream_get_bytes(bs, (uint8_t *)data, size) < 0) {
     goto out;
   }
   result = rb_str_new(data, (long)size);
@@ -157,7 +155,7 @@ int run_fuzz_function(struct ByteStream *bs, struct TargetFunction *fcn) {
   struct TargetCall call;
   call.fcn_ = fcn;
   call.args_ = args;
-  
+
   result = call_protected(&call);
 
 out:
@@ -165,9 +163,9 @@ out:
   return result;
 }
 
-void init_TargetFunction(
-  struct TargetFunction *target, const char *module, const char *cls, const char *name, 
-  const int nargs, const enum RubyDataType *argTypes) {
+void init_TargetFunction(struct TargetFunction *target, const char *module,
+                         const char *cls, const char *name, const int nargs,
+                         const enum RubyDataType *argTypes) {
   require(module);
   target->module_ = module;
   target->cls_ = cls;
@@ -179,86 +177,115 @@ void init_TargetFunction(
 }
 
 static void init_date_strptime(struct TargetFunction *target) {
-   static const enum RubyDataType argTypes[2] = { RDT_CString, RDT_CString };
-   init_TargetFunction(target, "date", "Date", "strptime", ARRAYSIZE(argTypes), argTypes);
+  static const enum RubyDataType argTypes[2] = {RDT_CString, RDT_CString};
+  init_TargetFunction(target, "date", "Date", "strptime", ARRAYSIZE(argTypes),
+                      argTypes);
 }
 
 static void init_date_httpdate(struct TargetFunction *target) {
-   static const enum RubyDataType argTypes[1] = { RDT_CString };
-   init_TargetFunction(target, "date", "Date", "httpdate", ARRAYSIZE(argTypes), argTypes);
+  static const enum RubyDataType argTypes[1] = {RDT_CString};
+  init_TargetFunction(target, "date", "Date", "httpdate", ARRAYSIZE(argTypes),
+                      argTypes);
 }
 
 static void init_date_parse(struct TargetFunction *target) {
-   static const enum RubyDataType argTypes[1] = { RDT_CString };
-   init_TargetFunction(target, "date", "Date", "parse", ARRAYSIZE(argTypes), argTypes);
+  static const enum RubyDataType argTypes[1] = {RDT_CString};
+  init_TargetFunction(target, "date", "Date", "parse", ARRAYSIZE(argTypes),
+                      argTypes);
 }
 
 static void init_json_parse(struct TargetFunction *target) {
-   static const enum RubyDataType argTypes[1] = { RDT_CString };
-   init_TargetFunction(target, "json", "JSON", "parse", ARRAYSIZE(argTypes), argTypes);
+  static const enum RubyDataType argTypes[1] = {RDT_CString};
+  init_TargetFunction(target, "json", "JSON", "parse", ARRAYSIZE(argTypes),
+                      argTypes);
 }
 
 static void init_psych_parse(struct TargetFunction *target) {
-   static const enum RubyDataType argTypes[1] = { RDT_CString };
-   init_TargetFunction(target, "psych", "Psych", "parse", ARRAYSIZE(argTypes), argTypes);
+  static const enum RubyDataType argTypes[1] = {RDT_CString};
+  init_TargetFunction(target, "psych", "Psych", "parse", ARRAYSIZE(argTypes),
+                      argTypes);
 }
 
 typedef void (*init_TargetFunction_ptr)(struct TargetFunction *target);
 
 static init_TargetFunction_ptr init_functions[] = {
-  init_date_parse,
-//  init_date_strptime, init_date_httpdate,
-  init_json_parse, init_psych_parse
-};
+    init_date_parse,
+    //  init_date_strptime, init_date_httpdate,
+    init_json_parse, init_psych_parse};
 
-int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
-{
-#if 0
-    char rubylibdir[PATH_MAX];
-    char cwd[PATH_MAX];
-#endif
-    struct ByteStream bs = {};
+static int init_env() {
+  char rubylib[0x1000];
+  char cwd[PATH_MAX];
+  char ld_library_path[0x1000];
+  const char *outpath = getenv("OUT");
 
-    ByteStream_init(&bs, data, size);
+  getcwd(cwd, sizeof(cwd));
+  if (!outpath) {
+    outpath = cwd;
+  }
 
-#if 0
-    getcwd(cwd, sizeof(cwd));
+  const char *old_ld_library_path = getenv("LD_LIBRARY_PATH");
+  int r;
+  if (old_ld_library_path) {
+    r = snprintf(ld_library_path, sizeof(ld_library_path), "%s/lib:%s", outpath,
+                 old_ld_library_path);
+  } else {
+    r = snprintf(ld_library_path, sizeof(ld_library_path), "%s/lib", outpath);
+  }
+  if (r < 0 || (size_t)r >= sizeof(ld_library_path)) {
+    return -1;
+  }
+  printf("LD_LIBRARY_PATH = %s\n", ld_library_path);
+  if (setenv("LD_LIBRARY_PATH", ld_library_path, 1) < 0) {
+    return -1;
+  }
 
-    const char *outpath = getenv("OUT");
-    if (!outpath) {
-      outpath = cwd;
+  r = init_ruby_load_paths(rubylib, sizeof(rubylib), outpath);
+  if (r < 0 || (size_t)r >= sizeof(rubylib)) {
+    return -1;
+  }
+  printf("RUBYLIB = %s\n", rubylib);
+  if (setenv("RUBYLIB", rubylib, 1) < 0) {
+    return -1;
+  }
+  return 0;
+}
+
+int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+  struct ByteStream bs = {};
+
+  ByteStream_init(&bs, data, size);
+
+  // Static array of target functions. These only need to be initialized once.
+  static struct TargetFunction target_functions[ARRAYSIZE(init_functions)] = {};
+
+  // Initialize the Ruby interpreter.
+  static bool ruby_initialized = false;
+  if (!ruby_initialized) {
+    ruby_initialized = true;
+
+    if (init_env() < 0) {
+      abort();
     }
-    snprintf(rubylibdir, sizeof(rubylibdir), "%s/rubylibdir", outpath);
-    setenv("RUBYLIB", rubylibdir, 0);
-#endif
 
-    // Static array of target functions. These only need to be initialized once.
-    static struct TargetFunction target_functions[ARRAYSIZE(init_functions)] = {};
+    ruby_init();
+    ruby_init_loadpath();
 
-    // Initialize the Ruby interpreter.
-    static bool ruby_initialized = false;
-    if (!ruby_initialized) {
-      ruby_initialized = true;
-#if 0
-      RUBY_INIT_STACK;
-#endif
-      ruby_init();
-      ruby_init_loadpath();
-
-      // Initialize the fuzzing functions.
-      for (size_t i = 0; i < ARRAYSIZE(init_functions); i++) {
-        init_functions[i](&target_functions[i]);
-      }
+    // Initialize the fuzzing functions.
+    for (size_t i = 0; i < ARRAYSIZE(init_functions); i++) {
+      init_functions[i](&target_functions[i]);
     }
+  }
 
-    // Choose a function from `target_functions`.
-    uint32_t i = 0;
-    if (BytesStream_get_uint32_t(&bs, &i) < 0) {
-      goto out;
-    }
-    struct TargetFunction *fcn = &target_functions[i % ARRAYSIZE(target_functions)];
-    run_fuzz_function(&bs, fcn);
+  // Choose a function from `target_functions`.
+  uint32_t i = 0;
+  if (BytesStream_get_uint32_t(&bs, &i) < 0) {
+    goto out;
+  }
+  struct TargetFunction *fcn =
+      &target_functions[i % ARRAYSIZE(target_functions)];
+  run_fuzz_function(&bs, fcn);
 
 out:
-    return 0;
+  return 0;
 }
