@@ -25,11 +25,12 @@
 # calls the fuzzer binary with those environment variables set.
 
 old_lib_dir = ENV["RUBY_LIB_DIR"]
-new_lib_dir = ENV["OUT"] + "/lib"
 
-puts "#!/bin/bash"
+puts "#!/bin/sh"
 puts "# LLVMFuzzerTestOneInput for fuzzer detection."
-puts "export LD_LIBRARY_PATH=" + new_lib_dir
+puts "export THIS_DIR=$(dirname $(realpath \"$0\"))"
+puts "export THIS_LIB_DIR=\"$THIS_DIR/lib\""
+puts "export LD_LIBRARY_PATH=\"$THIS_LIB_DIR:$LD_LIBRARY_PATH\""
 
 n = $LOAD_PATH.length
 i = 0
@@ -37,7 +38,7 @@ puts "export RUBYLIB=\"\\"
 while i < n do
   path = $LOAD_PATH[i]
   if path.start_with?(old_lib_dir)
-    puts new_lib_dir + path.delete_prefix(old_lib_dir) + (i+1 < n ? ":\\" : "\"")
+    puts "$THIS_LIB_DIR" + path.delete_prefix(old_lib_dir) + (i+1 < n ? ":\\" : "\"")
   else
     abort
   end
