@@ -235,7 +235,7 @@ static int init_env() {
   if (r < 0 || (size_t)r >= sizeof(ld_library_path)) {
     return -1;
   }
-  printf("LD_LIBRARY_PATH = %s\n", ld_library_path);
+  fprintf(stderr, "LD_LIBRARY_PATH = %s\n", ld_library_path);
   if (setenv("LD_LIBRARY_PATH", ld_library_path, 1) < 0) {
     return -1;
   }
@@ -244,7 +244,7 @@ static int init_env() {
   if (r < 0 || (size_t)r >= sizeof(rubylib)) {
     return -1;
   }
-  printf("RUBYLIB = %s\n", rubylib);
+  fprintf(stderr, "RUBYLIB = %s\n", rubylib);
   if (setenv("RUBYLIB", rubylib, 1) < 0) {
     return -1;
   }
