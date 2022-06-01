@@ -16,7 +16,7 @@
 ################################################################################
 
 export ASAN_OPTIONS="detect_leaks=0"
-export UBSAN_OPTIONS="detect_leaks=0"
+export UBSAN_OPTIONS="silence_unsigned_overflow=1"
 
 ./autogen.sh
 ./configure --enable-shared
