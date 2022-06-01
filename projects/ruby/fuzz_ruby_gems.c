@@ -216,7 +216,9 @@ static init_TargetFunction_ptr init_functions[] = {
 static int init_env() {
   char rubylib[0x1000];
   char cwd[PATH_MAX];
+#if 0
   char ld_library_path[0x1000];
+#endif
   const char *outpath = getenv("OUT");
 
   getcwd(cwd, sizeof(cwd));
@@ -224,8 +226,9 @@ static int init_env() {
     outpath = cwd;
   }
 
-  const char *old_ld_library_path = getenv("LD_LIBRARY_PATH");
   int r;
+#if 0
+  const char *old_ld_library_path = getenv("LD_LIBRARY_PATH");
   if (old_ld_library_path) {
     r = snprintf(ld_library_path, sizeof(ld_library_path), "%s/lib:%s", outpath,
                  old_ld_library_path);
@@ -239,6 +242,7 @@ static int init_env() {
   if (setenv("LD_LIBRARY_PATH", ld_library_path, 1) < 0) {
     return -1;
   }
+#endif
 
   r = init_ruby_load_paths(rubylib, sizeof(rubylib), outpath);
   if (r < 0 || (size_t)r >= sizeof(rubylib)) {
