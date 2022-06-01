@@ -38,6 +38,7 @@ cd $SRC/fuzz
 ruby gen_fuzz_wrapper.rb > init_ruby_load_paths.h
 ${CC} ${CFLAGS} fuzz_ruby_gems.c -o $OUT/fuzz_ruby_gems \
     -Wall \
+    -Wl,-rpath,./lib \
     -L${RUBY_LIB_DIR} \
     ${RUBY_INCLUDES} \
     ${RUBY_LIBRARIES} \
