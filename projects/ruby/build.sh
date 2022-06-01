@@ -15,8 +15,8 @@
 #
 ################################################################################
 
-export ASAN_OPTIONS="detect_leaks=0:$ASAN_OPTIONS"
-export UBSAN_OPTIONS="detect_leaks=0:$UBSAN_OPTIONS"
+export ASAN_OPTIONS="detect_leaks=0"
+export UBSAN_OPTIONS="detect_leaks=0"
 
 ./autogen.sh
 ./configure --enable-shared
