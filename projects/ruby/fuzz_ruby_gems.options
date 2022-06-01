@@ -1,3 +1,2 @@
 [libfuzzer]
 detect_leaks=0
-detect_odr_violation=0

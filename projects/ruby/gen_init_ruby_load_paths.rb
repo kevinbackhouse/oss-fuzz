@@ -15,14 +15,15 @@
 
 # Ruby gems are shared objects that need to be dynamically loaded.
 # OSS-Fuzz requires all the binary files to be copied to the /out
-# directory, so static linking is recommended. But static linking
-# prevents the dynamic loading of gems from working. So, instead, we
-# need to build ruby with the --enabled-shared flag and copy all the
-# relevant shared objects to the /out directory. We also need to
-# invoke the fuzzer binary with the LD_LIBRARY_PATH and RUBYLIB
-# environment variables set, so that the ruby interpreter is able to
-# find those files. This script generates a wrapper bash script that
-# calls the fuzzer binary with those environment variables set.
+# directory, so static linking is usually recommended. Unfortunately,
+# static linking prevents the dynamic loading of gems from
+# working. So, instead, we need to build ruby with the
+# --enabled-shared flag and copy all the relevant shared objects to
+# the /out directory. We also need to invoke the fuzzer binary with
+# the RUBYLIB environment variable set, so that the ruby interpreter
+# is able to find those files. This script generates a C function
+# named init_ruby_load_paths() which is used to set the RUBYLIB
+# environment variable at runtime.
 
 old_lib_dir = ENV["RUBY_LIB_DIR"]
 
