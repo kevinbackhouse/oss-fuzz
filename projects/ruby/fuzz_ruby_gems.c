@@ -238,6 +238,53 @@ static int setenv_rubylib() {
   return 0;
 }
 
+static void workaround_UBSAN_CALLS_THRESHOLD_FOR_UBSAN_BUILD(size_t x) {
+  static size_t n = 0;
+  switch(x) {
+  case 0: n++;
+  case 1: n++;
+  case 2: n++;
+  case 3: n++;
+  case 4: n++;
+  case 5: n++;
+  case 6: n++;
+  case 7: n++;
+  case 8: n++;
+  case 9: n++;
+  case 10: n++;
+  case 11: n++;
+  case 12: n++;
+  case 13: n++;
+  case 14: n++;
+  case 15: n++;
+  case 16: n++;
+  case 17: n++;
+  case 18: n++;
+  case 19: n++;
+  case 20: n++;
+  case 21: n++;
+  case 22: n++;
+  case 23: n++;
+  case 24: n++;
+  case 25: n++;
+  case 26: n++;
+  case 27: n++;
+  case 28: n++;
+  case 29: n++;
+  case 30: n++;
+  case 31: n++;
+  case 32: n++;
+  case 33: n++;
+  case 34: n++;
+  case 35: n++;
+  case 36: n++;
+  case 37: n++;
+  case 38: n++;
+  case 39: n++;
+  default: n++;
+  }
+}
+
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
   struct ByteStream bs = {};
 
@@ -262,6 +309,12 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     for (size_t i = 0; i < ARRAYSIZE(init_functions); i++) {
       init_functions[i](&target_functions[i]);
     }
+
+    uint32_t x = 0;
+    if (BytesStream_get_uint32_t(&bs, &x) < 0) {
+      goto out;
+    }
+    workaround_UBSAN_CALLS_THRESHOLD_FOR_UBSAN_BUILD(x);
   }
 
   // Choose a function from `target_functions`.
