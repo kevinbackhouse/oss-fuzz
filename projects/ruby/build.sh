@@ -23,6 +23,23 @@ export UBSAN_OPTIONS="silence_unsigned_overflow=1"
 
 make -j $(nproc)
 
+# The `ln` command below is a workaround for an issue with ruby's
+# build system, which seems to be a known problem. See this commit:
+#
+# https://github.com/ruby/ruby/commit/9ee48c0a7ce6e7c497bba87c5702ac88d1373bfb
+#
+# Our problem is that `make install` runs some ruby code, using the
+# newly built ruby interpreter, but with the `LD_PRELOAD` environment
+# variable set so that it can find `libruby.so`. Some of the those
+# ruby scripts exec other binaries, such as `make`. Those binaries
+# then crash because they can't find the ASAN lib, which is
+# recursively pulled in by `libruby.so`.
+#
+# Apparently the same problem happened before on multiarch platforms,
+# so a workaround was added in commit 9ee48c0 (link above): if the
+# file `exe/ruby` exists then the `LD_PRELOAD` environment variable is
+# not set. We trigger the workaround here by creating a symlink to the
+# ruby binary.
 mkdir -p exe
 ln -s ../ruby exe/ruby
 
@@ -48,4 +65,5 @@ ${CC} ${CFLAGS} fuzz_ruby_gems.c -o $OUT/fuzz_ruby_gems \
 
 # Copy options to out
 cp $SRC/fuzz/*.options $OUT/
+rm -fr $OUT/lib
 cp -r $RUBY_LIB_DIR $OUT/lib
