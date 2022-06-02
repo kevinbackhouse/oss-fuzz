@@ -238,6 +238,9 @@ static int setenv_rubylib() {
   return 0;
 }
 
+// Bogus code to add a bunch of extra calls to __ubsan functions so that we
+// get over the minimum threshold (169 calls) required by bad_build_check:
+// https://github.com/google/oss-fuzz/blob/5af82b8e388a3455690c40d3d99c92d4a213a602/infra/base-images/base-runner/bad_build_check#L44-L48
 static void workaround_UBSAN_CALLS_THRESHOLD_FOR_UBSAN_BUILD(size_t x) {
   static size_t n = 0;
   switch(x) {
