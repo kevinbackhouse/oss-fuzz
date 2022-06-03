@@ -209,9 +209,8 @@ static void init_psych_parse(struct TargetFunction *target) {
 typedef void (*init_TargetFunction_ptr)(struct TargetFunction *target);
 
 static init_TargetFunction_ptr init_functions[] = {
-    init_date_parse,
-    init_date_strptime, init_date_httpdate,
-    init_json_parse, init_psych_parse};
+    init_date_parse, init_date_strptime, init_date_httpdate, init_json_parse,
+    init_psych_parse};
 
 // setenv("RUBYLIB", ...) so that dynamic loading of ruby gems
 // (which are in an unusual location due to the OSS-Fuzz infrastructure)
@@ -243,48 +242,89 @@ static int setenv_rubylib() {
 // https://github.com/google/oss-fuzz/blob/5af82b8e388a3455690c40d3d99c92d4a213a602/infra/base-images/base-runner/bad_build_check#L44-L48
 static void workaround_UBSAN_CALLS_THRESHOLD_FOR_UBSAN_BUILD(size_t x) {
   static size_t n = 0;
-  switch(x) {
-  case 0: n++;
-  case 1: n++;
-  case 2: n++;
-  case 3: n++;
-  case 4: n++;
-  case 5: n++;
-  case 6: n++;
-  case 7: n++;
-  case 8: n++;
-  case 9: n++;
-  case 10: n++;
-  case 11: n++;
-  case 12: n++;
-  case 13: n++;
-  case 14: n++;
-  case 15: n++;
-  case 16: n++;
-  case 17: n++;
-  case 18: n++;
-  case 19: n++;
-  case 20: n++;
-  case 21: n++;
-  case 22: n++;
-  case 23: n++;
-  case 24: n++;
-  case 25: n++;
-  case 26: n++;
-  case 27: n++;
-  case 28: n++;
-  case 29: n++;
-  case 30: n++;
-  case 31: n++;
-  case 32: n++;
-  case 33: n++;
-  case 34: n++;
-  case 35: n++;
-  case 36: n++;
-  case 37: n++;
-  case 38: n++;
-  case 39: n++;
-  default: n++;
+  switch (x) {
+  case 0:
+    n++;
+  case 1:
+    n++;
+  case 2:
+    n++;
+  case 3:
+    n++;
+  case 4:
+    n++;
+  case 5:
+    n++;
+  case 6:
+    n++;
+  case 7:
+    n++;
+  case 8:
+    n++;
+  case 9:
+    n++;
+  case 10:
+    n++;
+  case 11:
+    n++;
+  case 12:
+    n++;
+  case 13:
+    n++;
+  case 14:
+    n++;
+  case 15:
+    n++;
+  case 16:
+    n++;
+  case 17:
+    n++;
+  case 18:
+    n++;
+  case 19:
+    n++;
+  case 20:
+    n++;
+  case 21:
+    n++;
+  case 22:
+    n++;
+  case 23:
+    n++;
+  case 24:
+    n++;
+  case 25:
+    n++;
+  case 26:
+    n++;
+  case 27:
+    n++;
+  case 28:
+    n++;
+  case 29:
+    n++;
+  case 30:
+    n++;
+  case 31:
+    n++;
+  case 32:
+    n++;
+  case 33:
+    n++;
+  case 34:
+    n++;
+  case 35:
+    n++;
+  case 36:
+    n++;
+  case 37:
+    n++;
+  case 38:
+    n++;
+  case 39:
+    n++;
+  default:
+    n++;
   }
 }
 
