@@ -206,11 +206,36 @@ static void init_psych_parse(struct TargetFunction *target) {
                       argTypes);
 }
 
+static void init_openssl_read(struct TargetFunction *target) {
+  static const enum RubyDataType argTypes[1] = {RDT_CString};
+  init_TargetFunction(target, "openssl", "OpenSSL::PKey", "read",
+                      ARRAYSIZE(argTypes), argTypes);
+}
+
+static void init_openssl_read_smime(struct TargetFunction *target) {
+  static const enum RubyDataType argTypes[1] = {RDT_CString};
+  init_TargetFunction(target, "openssl", "OpenSSL::PKCS7", "read_smime",
+                      ARRAYSIZE(argTypes), argTypes);
+}
+
+static void init_openssl_sprintf(struct TargetFunction *target) {
+  static const enum RubyDataType argTypes[2] = {RDT_CString, RDT_CString};
+  init_TargetFunction(target, "openssl", "Kernel", "sprintf",
+                      ARRAYSIZE(argTypes), argTypes);
+}
+
+static void init_CGI_unescapeHTML(struct TargetFunction *target) {
+  static const enum RubyDataType argTypes[1] = {RDT_CString};
+  init_TargetFunction(target, "cgi", "CGI", "unescapeHTML", ARRAYSIZE(argTypes),
+                      argTypes);
+}
+
 typedef void (*init_TargetFunction_ptr)(struct TargetFunction *target);
 
 static init_TargetFunction_ptr init_functions[] = {
-    init_date_parse, init_date_strptime, init_date_httpdate, init_json_parse,
-    init_psych_parse};
+    init_date_parse,         init_date_strptime,   init_date_httpdate,
+    init_json_parse,         init_psych_parse,     init_openssl_read,
+    init_openssl_read_smime, init_openssl_sprintf, init_CGI_unescapeHTML};
 
 // setenv("RUBYLIB", ...) so that dynamic loading of ruby gems
 // (which are in an unusual location due to the OSS-Fuzz infrastructure)
@@ -354,9 +379,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     }
 
     uint32_t x = 0;
-    if (BytesStream_get_uint32_t(&bs, &x) < 0) {
-      goto out;
-    }
+    BytesStream_get_uint32_t(&bs, &x);
     workaround_UBSAN_CALLS_THRESHOLD_FOR_UBSAN_BUILD(x);
   }
 
