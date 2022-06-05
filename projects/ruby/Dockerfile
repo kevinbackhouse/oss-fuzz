@@ -14,17 +14,12 @@
 #
 ################################################################################
 
-#FROM ubuntu:22.04
-#ENV DEBIAN_FRONTEND=noninteractive
-
 FROM gcr.io/oss-fuzz-base/base-builder
 
 RUN apt-get update -y && \
-    apt-get install -y make autoconf automake build-essential clang \
-                       libssl-dev libyaml-dev libreadline6-dev \
+    apt-get install -y libssl-dev libyaml-dev libreadline6-dev \
                        zlib1g-dev libncurses5-dev libffi-dev \
-                       bison autoconf ruby pkg-config \
-                       git gdb tmux emacs
+                       bison autoconf ruby pkg-config
 
 RUN git clone https://github.com/ruby/ruby.git
 WORKDIR ruby
