@@ -89,12 +89,12 @@ int ByteStream_get_bytes(struct ByteStream *bs, uint8_t *data, size_t size) {
 
 // Initialize x with bytes from the ByteStream. Returns -1 on error.
 int BytesStream_get_uint32_t(struct ByteStream *bs, uint32_t *x) {
-  return ByteStream_get_bytes(bs, (uint8_t *)x, sizeof(x));
+  return ByteStream_get_bytes(bs, (uint8_t *)x, sizeof(*x));
 }
 
 // Initialize x with bytes from the ByteStream. Returns -1 on error.
 int BytesStream_get_uint64_t(struct ByteStream *bs, uint64_t *x) {
-  return ByteStream_get_bytes(bs, (uint8_t *)x, sizeof(x));
+  return ByteStream_get_bytes(bs, (uint8_t *)x, sizeof(*x));
 }
 
 VALUE generate_CString(struct ByteStream *bs) {
