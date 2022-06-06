@@ -21,7 +21,8 @@ struct TargetFunction {
   const char *module_;
   const char *cls_;
   const char *name_;
-  VALUE obj_;
+  VALUE module_obj_;
+  VALUE cls_obj_;
   ID method_id_;
   int nargs_;
   const enum RubyDataType *argTypes_;
@@ -156,7 +157,9 @@ int run_fuzz_function(struct ByteStream *bs, struct TargetFunction *fcn) {
   call.fcn_ = fcn;
   call.args_ = args;
 
-  result = call_protected(&call);
+  if (call_protected(&call)) {
+    result = 0;
+  }
 
 out:
   free(args);
@@ -166,11 +169,11 @@ out:
 void init_TargetFunction(struct TargetFunction *target, const char *module,
                          const char *cls, const char *name, const int nargs,
                          const enum RubyDataType *argTypes) {
-  require(module);
   target->module_ = module;
+  target->module_obj_ = require(module);
   target->cls_ = cls;
+  target->cls_obj_ = rb_path2class(cls);
   target->name_ = name;
-  target->obj_ = rb_path2class(cls);
   target->method_id_ = rb_intern(name);
   target->nargs_ = nargs;
   target->argTypes_ = argTypes;
