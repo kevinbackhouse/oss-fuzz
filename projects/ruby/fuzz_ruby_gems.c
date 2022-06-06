@@ -46,7 +46,7 @@ VALUE eval(const char *cmd) {
 static VALUE call_protected_helper(VALUE rdata) {
   struct TargetCall *call = (struct TargetCall *)(rdata);
   struct TargetFunction *fcn = call->fcn_;
-  return rb_funcall2(fcn->obj_, fcn->method_id_, fcn->nargs_, call->args_);
+  return rb_funcall2(fcn->cls_obj_, fcn->method_id_, fcn->nargs_, call->args_);
 };
 
 VALUE call_protected(struct TargetCall *call) {
