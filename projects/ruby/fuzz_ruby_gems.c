@@ -65,7 +65,7 @@ VALUE require(const char *module) {
   return eval(cmd);
 #endif
   int state = 0;
-  VALUE result = rb_protect(RUBY_METHOD_FUNC(rb_require), (VALUE)module, &error);
+  VALUE result = rb_protect(RUBY_METHOD_FUNC(rb_require), (VALUE)module, &state);
   if (state != 0) {
     rb_set_errinfo(Qnil);
   }
