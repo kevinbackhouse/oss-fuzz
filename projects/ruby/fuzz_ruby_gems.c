@@ -59,9 +59,17 @@ VALUE call_protected(struct TargetCall *call) {
 }
 
 VALUE require(const char *module) {
+#if 0
   char cmd[1024];
   snprintf(cmd, sizeof(cmd), "require '%s'\n", module);
   return eval(cmd);
+#endif
+  int state = 0;
+  VALUE result = rb_protect(RUBY_METHOD_FUNC(rb_require), (VALUE)module, &error);
+  if (state != 0) {
+    rb_set_errinfo(Qnil);
+  }
+  return result;
 }
 
 struct ByteStream {
@@ -171,8 +179,10 @@ void init_TargetFunction(struct TargetFunction *target, const char *module,
                          const enum RubyDataType *argTypes) {
   target->module_ = module;
   target->module_obj_ = require(module);
+  rb_global_variable(&target->module_obj_);
   target->cls_ = cls;
   target->cls_obj_ = rb_path2class(cls);
+  rb_global_variable(&target->cls_obj_);
   target->name_ = name;
   target->method_id_ = rb_intern(name);
   target->nargs_ = nargs;
