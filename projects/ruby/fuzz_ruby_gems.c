@@ -385,7 +385,6 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     // Initialize the fuzzing functions.
     for (size_t i = 0; i < ARRAYSIZE(init_functions); i++) {
       init_functions[i](&target_functions[i]);
-      rb_gc();
     }
 
     uint32_t x = 0;
