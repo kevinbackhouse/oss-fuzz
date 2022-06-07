@@ -60,7 +60,8 @@ VALUE call_protected(struct TargetCall *call) {
 
 VALUE require(const char *module) {
   int state = 0;
-  VALUE result = rb_protect(RUBY_METHOD_FUNC(rb_require), (VALUE)module, &state);
+  VALUE result =
+      rb_protect(RUBY_METHOD_FUNC(rb_require), (VALUE)module, &state);
   if (state != 0) {
     rb_set_errinfo(Qnil);
   }
