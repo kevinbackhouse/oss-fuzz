@@ -59,11 +59,6 @@ VALUE call_protected(struct TargetCall *call) {
 }
 
 VALUE require(const char *module) {
-#if 0
-  char cmd[1024];
-  snprintf(cmd, sizeof(cmd), "require '%s'\n", module);
-  return eval(cmd);
-#endif
   int state = 0;
   VALUE result = rb_protect(RUBY_METHOD_FUNC(rb_require), (VALUE)module, &state);
   if (state != 0) {
