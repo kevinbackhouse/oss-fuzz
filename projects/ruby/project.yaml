@@ -1,4 +1,7 @@
 homepage: "https://www.ruby-lang.org/"
 language: c
-primary_contact: "kevinbackhouse@github.com"
+primary_contact: "john@hawthorn.email"
+auto_ccs:
+  - "kevinbackhouse@github.com"
+  - "mame@ruby-lang.org"
 main_repo: "https://github.com/ruby/ruby"
