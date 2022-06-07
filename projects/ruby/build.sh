@@ -15,7 +15,7 @@
 #
 ################################################################################
 
-export ASAN_OPTIONS="detect_leaks=0:use_sigaltstack=0"
+export ASAN_OPTIONS="detect_leaks=0:use_sigaltstack=0:detect_stack_use_after_return=0"
 export UBSAN_OPTIONS="silence_unsigned_overflow=1"
 
 ./autogen.sh
