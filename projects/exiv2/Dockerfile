@@ -20,3 +20,4 @@ RUN ./exiv2/ci/install_dependencies.sh
 WORKDIR exiv2
 
 COPY build.sh $SRC/
+COPY patch.txt $SRC/
