@@ -1,19 +1,9 @@
-From cbf4157287a7a8af6336e1594e19103615f7bf9d Mon Sep 17 00:00:00 2001
-From: =?UTF-8?q?Milo=C5=A1=20Komar=C4=8Devi=C4=87?=
- <miloskomarcevic@aim.com>
-Date: Thu, 9 Jan 2025 13:58:45 +0100
-Subject: [PATCH] Export fmt dependency in CMake config
-
----
- cmake/exiv2Config.cmake.in | 4 ++++
- 1 file changed, 4 insertions(+)
-
 diff --git a/cmake/exiv2Config.cmake.in b/cmake/exiv2Config.cmake.in
-index 1089786ff6..ee8d3459fe 100644
+index 7ce3aad48..5bf321a82 100644
 --- a/cmake/exiv2Config.cmake.in
 +++ b/cmake/exiv2Config.cmake.in
-@@ -25,6 +25,10 @@ if(@EXV_HAVE_LIBICONV@) # if(EXV_HAVE_LIBICONV)
-     find_dependency(Iconv REQUIRED)
+@@ -27,6 +27,10 @@ if(NOT @BUILD_SHARED_LIBS@) # if(NOT BUILD_SHARED_LIBS)
+   endif()
  endif()
  
 +if(NOT "@HAVE_STD_FORMAT@") # if(NOT HAVE_STD_FORMAT)
