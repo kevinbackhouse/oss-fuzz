@@ -15,10 +15,8 @@
 ################################################################################
 FROM gcr.io/oss-fuzz-base/base-builder
 
-RUN git clone https://github.com/Exiv2/exiv2 exiv2
+RUN git clone https://github.com/kevinbackhouse/exiv2 exiv2
 RUN ./exiv2/ci/install_dependencies.sh
 WORKDIR exiv2
 
 COPY build.sh $SRC/
-COPY patch.txt $SRC/
-COPY 3108.patch $SRC/
